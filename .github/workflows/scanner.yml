@@ -38,12 +38,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run scanner
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+       - name: Test Binance access
         run: |
-          python binance_early_pump_v4.py
+          python - <<'PY'
+          import requests
+
+          urls = [
+              "https://api.binance.com/api/v3/ping",
+              "https://api1.binance.com/api/v3/ping",
+              "https://api2.binance.com/api/v3/ping",
+              "https://api3.binance.com/api/v3/ping",
+              "https://api4.binance.com/api/v3/ping",
+          ]
+
+          for url in urls:
+              try:
+                  r = requests.get(url, timeout=10)
+                  print(url, "=>", r.status_code, r.text[:200])
+              except Exception as e:
+                  print(url, "=> ERROR:", e)
+          PY
+        
 
       - name: Save scanner state
         run: |
